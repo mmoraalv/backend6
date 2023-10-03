@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { userModel } from "../models/users.model.js";
+import { validatePassword } from "../utils/bcrypt.js";
 
 const sessionRouter = Router();
 
@@ -22,7 +23,7 @@ sessionRouter.post('/login', async (req,res) => {
             res.status(200).send({ error: `Login ya existente`});
         const user = await userModel.findOne({email: email});
         if(user) {
-            if(user.password == password) {
+            if (validatePassword(password, user.password)) {
                 req.session.login = true;
                 res.redirect(`/static/products?info=${user.first_name}`);
                 return;

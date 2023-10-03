@@ -1,14 +1,20 @@
 import { Router } from "express";
 import { userModel } from "../models/users.model.js";
+import { createHash } from "../utils/bcrypt.js";
 
 const userRouter = Router()
 
 userRouter.post('/register', async(req,res) => {
     const {first_name, last_name, email, password, age} = req.body
     try{
-        const respuesta = await userModel.create({first_name, last_name, email, password, age})
-        console.log(respuesta)
-        //res.render('user', {first_name: respuesta.first_name, last_name: respuesta.last_name, age: respuesta.age, email: respuesta.email, isLoged: req.session.email != undefined})
+        const hashPassword = createHash(password)
+        const respuesta = await userModel.create({
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            password: hashPassword,
+            age: age
+        })
         res.status(200).send({ mensaje: "Usuario creado", respuesta: respuesta});
     } catch(error) {
         res.status(400).send({error: `No se pudo registrar el usuario: ${error}`})
