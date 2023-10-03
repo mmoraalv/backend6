@@ -5,18 +5,17 @@ import { engine } from 'express-handlebars'
 import { Server } from 'socket.io'
 import { __dirname } from './path.js'
 import path from 'path'
-//import messageModel from './models/messages.models.js';
 import productRouter from './routes/products.routes.js'
 import cartRouter from './routes/carts.routes.js'
-//import messageRouter from './routes/messages.routes.js'
 import sessionRouter from './routes/sessions.routes.js'
 import userRouter from './routes/users.routes.js'
 import routerHandlebars from './routes/views.routes.js'
+import passport from 'passport'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import mongoose from 'mongoose';
-//import cartModel from './models/carts.models.js';
+import initializePassport from './config/passport.js'
 
 const PORT = 8080;
 const app = express();
@@ -38,12 +37,6 @@ const server = app.listen(PORT,()=>{
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); //URL extensas
 app.use(cookieParser(process.env.SIGNED_SECRET)) //Firmo la cookie
-
-
-//Handlebars
-app.engine('handlebars', engine()) //Defino que voy a trabajar con Handlebars
-app.set('view engine', 'handlebars')
-app.set('views', path.resolve(__dirname, './views'))
 app.use(session({
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URL,
@@ -54,6 +47,10 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }))
+
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 function auth(req,res,next) {
     console.log(req.session.email)
@@ -71,6 +68,11 @@ app.post('/products', (req,res) => {
         req.session.destroy()
         res.redirect(301, '/')
 })
+
+//Handlebars
+app.engine('handlebars', engine()) //Defino que voy a trabajar con Handlebars
+app.set('view engine', 'handlebars')
+app.set('views', path.resolve(__dirname, './views'))
 
 //Rutas
 app.use('/static', express.static(path.join(__dirname, '/public')));

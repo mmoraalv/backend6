@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { userModel } from "../models/users.model.js";
 import { validatePassword } from "../utils/bcrypt.js";
+import passport from "passport";
 
 const sessionRouter = Router();
 
@@ -16,8 +17,7 @@ sessionRouter.get('/logout', (req,res) => {
     }
 });
 
-sessionRouter.post('/login', async (req,res) => {
-    const {email,password} = req.body
+ /*const {email,password} = req.body
     try {
         if(req.session.login)
             res.status(200).send({ error: `Login ya existente`});
@@ -35,6 +35,24 @@ sessionRouter.post('/login', async (req,res) => {
         }
     } catch(error) {
         res.render("login", { message: "Error en login"})
+    }*/
+
+sessionRouter.post('/login', passport.authenticate('login'), async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).send({ mensaje: "Invalidate user" })
+        }
+
+        req.session.user = {
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            age: req.user.age,
+            email: req.user.email
+        }
+
+        res.status(200).send({ payload: req.user })
+    } catch (error) {
+        res.status(500).send({ mensaje: `Error al iniciar sesion ${error}` })
     }
 })
 
