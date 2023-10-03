@@ -1,7 +1,7 @@
 import local from 'passport-local' //Estrategia
 import passport from 'passport' //Manejador de las estrategias
 import { createHash, validatePassword } from '../utils/bcrypt.js'
-import { userModel } from '../models/users.models.js'
+import { userModel } from '../models/users.model.js'
 
 //Defino la estrategia a utilizar
 const LocalStrategy = local.Strategy
