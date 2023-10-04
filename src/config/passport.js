@@ -49,7 +49,7 @@ const initializePassport = () => {
 
     passport.use('login', new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
         try {
-            const user = await userModel.findOne({ email: email })
+            const user = await userModel.findOne({ email: username })
 
             if (!user) {
                 return done(null, false)
